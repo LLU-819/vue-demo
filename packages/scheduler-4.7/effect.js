@@ -27,7 +27,7 @@ export function effect(fn, options) {
 
 const bucket = new WeakMap()
 export function track(target, key) {
-    // console.log(`${key} track 依赖`,)
+    // console.log(`${key} track 依赖`)
     // 没有 activeEffect，直接 return
     if (!activeEffect) return target[key]
     // 根据 target 从“桶”中取得 depsMap，它也是一个 Map 类型：key --> effects

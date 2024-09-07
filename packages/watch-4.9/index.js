@@ -20,9 +20,9 @@ const obj = new Proxy(data, {
 
 watch(obj, () => {
   console.log('数据变化了', obj.foo)
-})
+}, {immediate: true})
 
-obj.foo++
+// obj.foo++
 
 
 

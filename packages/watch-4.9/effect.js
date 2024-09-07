@@ -116,33 +116,41 @@ export function computed(getter) {
     return computedObj
 }
 
-export function watch(source, cb) {
+export function watch(source, cb, options = {}) {
     let getter
     if (typeof source === 'function') {
         getter = source
     } else {
         getter = () => traverse(source)
     }
-    // 定义旧值与新值
+
     let oldValue, newValue
-    // 使用 effect 注册副作用函数时，开启 lazy 选项，并把返回值存储到 effectFn 中以便后续手动调用
+
+    // 提取 scheduler 调度函数为一个独立的 job 函数
+    const job = () => {
+        newValue = effectFn()
+        cb(newValue, oldValue)
+        oldValue = newValue
+    }
+
     const effectFn = effect(
+        // 执行 getter
         () => getter(),
         {
             lazy: true,
-            scheduler() {
-                // 在 scheduler 中重新执行副作用函数，得到的是新值
-                newValue = effectFn()
-                // 将旧值和新值作为回调函数的参数
-                cb(newValue, oldValue)
-                // 更新旧值，不然下一次会得到错误的旧值
-                oldValue = newValue
-            }
+            // 使用 job 函数作为调度器函数
+            scheduler: job
         }
     )
-    // 手动调用副作用函数，拿到的值就是旧值
-    oldValue = effectFn()
+
+    if (options.immediate) {
+        // 当 immediate 为 true 时立即执行 job，从而触发回调执行
+        job()
+    } else {
+        oldValue = effectFn()
+    }
 }
+
 
 function traverse(value, seen = new Set()) {
     // 如果要读取的数据是原始值，或者已经被读取过了，那么什么都不做
@@ -154,6 +162,6 @@ function traverse(value, seen = new Set()) {
     for (const k in value) {
         traverse(value[k], seen)
     }
-
+    // console.log('traverse', seen, value)
     return value
 }

@@ -23,7 +23,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/packages/watch-4.9/index.js"
+            "program": "${workspaceFolder}/packages/5.1-reflect/index.js"
         }
     ]
 }
